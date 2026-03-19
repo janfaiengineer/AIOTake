@@ -119,7 +119,7 @@ export default function Home() {
         </div>
 
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
-          WhatsApp Business Sync
+          WhatsApp Business Synccccccccccccccccccccc
         </h1>
 
         <p className="text-zinc-400 text-lg mb-10 max-w-lg leading-relaxed">
