@@ -119,11 +119,11 @@ export default function Home() {
         </div>
 
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
-          WhatsApp Business Synccccccccccccccccccccc
+          WhatsApp Business Sync
         </h1>
 
         <p className="text-zinc-400 text-lg mb-10 max-w-lg leading-relaxed">
-          Connect your WhatsApp Business App with our platform to enable seamless coexistence and automatic data synchronizationn.
+          Connect your WhatsApp Business App with our platform to enable seamless coexistence and automatic data synchronization.
         </p>
 
         <div className="flex flex-col items-center gap-6 w-full">

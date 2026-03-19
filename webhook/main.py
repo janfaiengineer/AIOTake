@@ -50,8 +50,10 @@ async def exchange_code_for_token(code: str) -> str:
     async with httpx.AsyncClient() as client:
         response = await client.get(url, params=params)
         if response.status_code != 200:
-            print(f"Token exchange failed: {response.text}")
-            raise HTTPException(status_code=400, detail="Failed to exchange code for token")
+            error_data = response.json() if response.status_code != 404 else {"error": {"message": response.text}}
+            error_msg = error_data.get("error", {}).get("message", "Unknown error from Meta")
+            print(f"Token exchange failed: {error_msg}")
+            raise HTTPException(status_code=400, detail=f"Failed to exchange code for token: {error_msg}")
         
         data = response.json()
         token = data.get("access_token")
