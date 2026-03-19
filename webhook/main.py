@@ -34,8 +34,9 @@ business_accounts: Dict[str, Dict[str, Any]] = {}
 
 class AuthRequest(BaseModel):
     code: str
+    redirect_uri: str | None = None
 
-async def exchange_code_for_token(code: str) -> str:
+async def exchange_code_for_token(code: str, redirect_uri: str | None = None) -> str:
     """Exchanges the authorization code for an access token."""
     if not APP_ID or not APP_SECRET:
         raise HTTPException(status_code=500, detail="Missing APP_ID or APP_SECRET in environment.")
@@ -46,6 +47,9 @@ async def exchange_code_for_token(code: str) -> str:
         "client_secret": APP_SECRET,
         "code": code,
     }
+    
+    if redirect_uri:
+        params["redirect_uri"] = redirect_uri
 
     async with httpx.AsyncClient() as client:
         response = await client.get(url, params=params)
@@ -110,7 +114,7 @@ async def handle_whatsapp_auth(auth_req: AuthRequest):
     """Handles the code from the frontend and exchanges it for a token."""
     print(f"Received auth code: {auth_req.code}")
     
-    access_token = await exchange_code_for_token(auth_req.code)
+    access_token = await exchange_code_for_token(auth_req.code, auth_req.redirect_uri)
     # Note: In a real flow, you'd get the WABA ID from the frontend or an event listener
     # Here we simulate adding it to our records.
     # For now, we'll use a placeholder if we can't find it immediately.
