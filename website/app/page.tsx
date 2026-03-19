@@ -85,7 +85,7 @@ export default function Home() {
         },
         body: JSON.stringify({ 
           code,
-          redirect_uri: window.location.origin
+          redirect_uri: window.location.href.split('?')[0]
         }),
       });
 
