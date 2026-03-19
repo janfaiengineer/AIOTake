@@ -54,7 +54,7 @@ export default function Home() {
           const code = response.authResponse.code;
           setStatus("Connected! Exchanging code...");
           console.log("Authorization Code:", code);
-          
+
           // Send code to backend
           sendCodeToBackend(code);
         } else {
@@ -121,9 +121,9 @@ export default function Home() {
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
           WhatsApp Business Sync
         </h1>
-        
+
         <p className="text-zinc-400 text-lg mb-10 max-w-lg leading-relaxed">
-          Connect your WhatsApp Business App with our platform to enable seamless coexistence and automatic data synchronization.
+          Connect your WhatsApp Business App with our platform to enable seamless coexistence and automatic data synchronizationn.
         </p>
 
         <div className="flex flex-col items-center gap-6 w-full">
@@ -133,7 +133,7 @@ export default function Home() {
             className={`
               group relative flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300
               ${loading || !isFbInitialized
-                ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-700' 
+                ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-700'
                 : 'bg-white text-black hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] active:scale-[0.98]'}
             `}
           >
