@@ -48,8 +48,10 @@ async def exchange_code_for_token(code: str, redirect_uri: str | None = None) ->
         "code": code,
     }
     
-    if redirect_uri:
-        params["redirect_uri"] = redirect_uri
+    # Note: redirect_uri is often not required for codes from JS SDK 
+    # and can be a source of mismatch errors.
+    # if redirect_uri:
+    #     params["redirect_uri"] = redirect_uri
 
     async with httpx.AsyncClient() as client:
         response = await client.get(url, params=params)
