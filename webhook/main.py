@@ -44,21 +44,39 @@ async def exchange_code_for_token(code: str, redirect_uri: str | None = None) ->
     url = f"https://graph.facebook.com/{GRAPH_API_VERSION}/oauth/access_token"
     
     # We will try a few variations of redirect_uri because Meta is extremely strict.
-    # 1. The one provided.
-    # 2. The one provided without trailing slash.
-    # 3. No redirect_uri at all (sometimes required for JS SDK flows).
+    # For JS SDK flows, Meta often expects the exact string used in the dialog.
     
-    variations = [redirect_uri]
-    if redirect_uri and redirect_uri.endswith("/"):
-        variations.append(redirect_uri.rstrip("/"))
-    elif redirect_uri:
-        variations.append(redirect_uri + "/")
-    variations.append(None) # Try without redirect_uri
+    variations = [
+        redirect_uri, # What the frontend says
+        "",           # Empty string (sometimes works for JS SDK)
+        None,         # No param at all
+    ]
+    
+    # Common variations of the frontend URL
+    if redirect_uri:
+        if redirect_uri.endswith("/"):
+            variations.append(redirect_uri.rstrip("/"))
+        else:
+            variations.append(redirect_uri + "/")
+    
+    # Add the specific Vercel URL with and without slashes as a safeguard
+    base_vercel = "https://website-iota-six-87.vercel.app"
+    if base_vercel not in variations:
+        variations.append(base_vercel)
+        variations.append(base_vercel + "/")
+
+    # Dedup variations while preserving order
+    seen = set()
+    final_variations = []
+    for v in variations:
+        if v not in seen:
+            final_variations.append(v)
+            seen.add(v)
 
     last_error = "Unknown error"
     
     async with httpx.AsyncClient() as client:
-        for uri in variations:
+        for uri in final_variations:
             params = {
                 "client_id": APP_ID,
                 "client_secret": APP_SECRET,
