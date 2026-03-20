@@ -42,33 +42,49 @@ async def exchange_code_for_token(code: str, redirect_uri: str | None = None) ->
         raise HTTPException(status_code=500, detail="Missing APP_ID or APP_SECRET in environment.")
 
     url = f"https://graph.facebook.com/{GRAPH_API_VERSION}/oauth/access_token"
-    params = {
-        "client_id": APP_ID,
-        "client_secret": APP_SECRET,
-        "code": code,
-    }
     
-    if redirect_uri:
-        print(f"Using redirect_uri in exchange: '{redirect_uri}'")
-        params["redirect_uri"] = redirect_uri
-    else:
-        print("No redirect_uri provided for exchange.")
+    # We will try a few variations of redirect_uri because Meta is extremely strict.
+    # 1. The one provided.
+    # 2. The one provided without trailing slash.
+    # 3. No redirect_uri at all (sometimes required for JS SDK flows).
+    
+    variations = [redirect_uri]
+    if redirect_uri and redirect_uri.endswith("/"):
+        variations.append(redirect_uri.rstrip("/"))
+    elif redirect_uri:
+        variations.append(redirect_uri + "/")
+    variations.append(None) # Try without redirect_uri
 
+    last_error = "Unknown error"
+    
     async with httpx.AsyncClient() as client:
-        response = await client.get(url, params=params)
-        if response.status_code != 200:
-            error_data = response.json() if response.status_code != 404 else {"error": {"message": response.text}}
-            with open("token_exchange_error.json", "w") as f:
-                json.dump(error_data, f)
-            error_msg = error_data.get("error", {}).get("message", "Unknown error from Meta")
-            print(f"Token exchange failed: {error_msg}")
-            raise HTTPException(status_code=400, detail=f"Failed to exchange code for token: {error_msg}")
+        for uri in variations:
+            params = {
+                "client_id": APP_ID,
+                "client_secret": APP_SECRET,
+                "code": code,
+            }
+            if uri:
+                params["redirect_uri"] = uri
+            
+            print(f"Attempting exchange with redirect_uri: '{uri}'")
+            response = await client.get(url, params=params)
+            
+            if response.status_code == 200:
+                data = response.json()
+                token = data.get("access_token")
+                if token:
+                    print(f"Success! Token exchanged using redirect_uri: '{uri}'")
+                    return str(token)
+            else:
+                error_data = response.json() if response.status_code != 404 else {"error": {"message": response.text}}
+                last_error = error_data.get("error", {}).get("message", response.text)
+                print(f"Failed with '{uri}': {last_error}")
+                # Continue to next variation
         
-        data = response.json()
-        token = data.get("access_token")
-        if not token:
-            raise HTTPException(status_code=400, detail="No access token returned from Meta")
-        return str(token)
+        # If we get here, all variations failed
+        print(f"Token exchange failed for all variations. Last error: {last_error}")
+        raise HTTPException(status_code=400, detail=f"Failed to exchange code for token: {last_error}")
     return ""
 
 async def get_waba_details(access_token: str) -> Dict[str, Any]:
