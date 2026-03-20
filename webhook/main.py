@@ -48,15 +48,18 @@ async def exchange_code_for_token(code: str, redirect_uri: str | None = None) ->
         "code": code,
     }
     
-    # Note: redirect_uri is often not required for codes from JS SDK 
-    # and can be a source of mismatch errors.
-    # if redirect_uri:
-    #     params["redirect_uri"] = redirect_uri
+    if redirect_uri:
+        print(f"Using redirect_uri in exchange: '{redirect_uri}'")
+        params["redirect_uri"] = redirect_uri
+    else:
+        print("No redirect_uri provided for exchange.")
 
     async with httpx.AsyncClient() as client:
         response = await client.get(url, params=params)
         if response.status_code != 200:
             error_data = response.json() if response.status_code != 404 else {"error": {"message": response.text}}
+            with open("token_exchange_error.json", "w") as f:
+                json.dump(error_data, f)
             error_msg = error_data.get("error", {}).get("message", "Unknown error from Meta")
             print(f"Token exchange failed: {error_msg}")
             raise HTTPException(status_code=400, detail=f"Failed to exchange code for token: {error_msg}")
@@ -115,6 +118,7 @@ async def root():
 async def handle_whatsapp_auth(auth_req: AuthRequest):
     """Handles the code from the frontend and exchanges it for a token."""
     print(f"Received auth code: {auth_req.code}")
+    print(f"Received redirect_uri: {auth_req.redirect_uri}")
     
     access_token = await exchange_code_for_token(auth_req.code, auth_req.redirect_uri)
     # Note: In a real flow, you'd get the WABA ID from the frontend or an event listener

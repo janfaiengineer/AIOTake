@@ -1,0 +1,1 @@
+{"error": {"message": "Error validating verification code. Please make sure your redirect_uri is identical to the one you used in the OAuth dialog request", "type": "OAuthException", "code": 100, "error_subcode": 36008, "fbtrace_id": "Ae6X5TfI7-uo7hhnEp_qd2o"}}
